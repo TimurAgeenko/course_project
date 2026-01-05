@@ -60,3 +60,22 @@ def sort_data_by_date(data: list[dict], date: str) -> list[dict] | str:
         return "Дата указана в неверном формате, пожалуйста, укажите её в формате YYYY-MM-DD"
 
     return result
+
+
+def get_cards_info(data: list[dict]) -> list[dict]:
+    cards_info = []
+    cards_set = set()
+
+    [cards_set.add(item["Номер карты"]) for item in data if item["Номер карты"]]
+
+    [cards_info.append({"last_digits": card[1:], "total_spent": 0}) for card in cards_set]
+
+    for item in data:
+        for card in cards_info:
+            if item["Номер карты"]:
+                if item["Номер карты"][1:] == card["last_digits"]:
+                    if item["Сумма операции"] < 0:
+                        card["total_spent"] += abs(item["Сумма операции"])
+            card["cashback"] = round((card["total_spent"] / 100), 2)
+
+    return cards_info

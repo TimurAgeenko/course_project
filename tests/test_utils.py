@@ -1,4 +1,4 @@
-from src.utils import choose_greeting, get_data, sort_data_by_date
+from src.utils import choose_greeting, get_cards_info, get_data, sort_data_by_date
 
 
 def test_choose_greeting():
@@ -31,3 +31,15 @@ def test_sort_data_by_date_wrong_format():
         sort_data_by_date(data, "15-09-2021")
         == "Дата указана в неверном формате, пожалуйста, укажите её в формате YYYY-MM-DD"
     )
+
+
+def test_get_cards_info():
+    data = get_data("./data/operations.xlsx")
+    data = sort_data_by_date(data, "2021-09-15")
+    cards_info = get_cards_info(data)
+
+    assert len(cards_info) == 2
+    assert isinstance(cards_info[0]["last_digits"], str)
+    assert len(cards_info[0]["last_digits"]) == 4
+    assert isinstance(cards_info[0]["total_spent"], float)
+    assert isinstance(cards_info[0]["cashback"], float)
