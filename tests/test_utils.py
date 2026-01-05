@@ -1,4 +1,4 @@
-from src.utils import choose_greeting, get_data
+from src.utils import choose_greeting, get_data, sort_data_by_date
 
 
 def test_choose_greeting():
@@ -18,3 +18,16 @@ def test_get_data():
 def test_get_data_not_exist():
     data = get_data("./data/operations_excel.xlsx")
     assert data == "File './data/operations_excel.xlsx' not found."
+
+
+def test_sort_data_by_date():
+    data = get_data("./data/operations.xlsx")
+    assert sort_data_by_date(data, "2021-09-15")[0]["Номер карты"] == "*7197"
+
+
+def test_sort_data_by_date_wrong_format():
+    data = get_data("./data/operations.xlsx")
+    assert (
+        sort_data_by_date(data, "15-09-2021")
+        == "Дата указана в неверном формате, пожалуйста, укажите её в формате YYYY-MM-DD"
+    )

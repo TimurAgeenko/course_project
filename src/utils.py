@@ -41,3 +41,22 @@ def get_data(path: str) -> list[dict] | str:
             return f"File '{path}' is not an excel file."
     else:
         return f"File '{path}' not found."
+
+
+def sort_data_by_date(data: list[dict], date: str) -> list[dict] | str:
+    """Принимает список словарей с транзакциями и дату в формате YYYY-MM-DD HH:MM:SS
+    и возвращает отсортированный список словарей, где находятся транзакции с датой от начала месяца,
+    на который выпадает указанная дата, до указанной даты"""
+    match = re.search(r"\d{4}-\d{2}-\d{2}", date)
+    result = []
+    if match:
+        digits = re.findall(r"\d+", match.group(0))
+        for item in data:
+            item_match = re.search(r"\d{2}\.\d{2}\.\d{4}", item["Дата операции"])
+            item_digits = re.findall(r"\d+", item_match.group(0))
+            if item_digits[0] <= digits[2] and item_digits[1] == digits[1] and item_digits[2] == digits[0]:
+                result.append(item)
+    else:
+        return "Дата указана в неверном формате, пожалуйста, укажите её в формате YYYY-MM-DD"
+
+    return result
