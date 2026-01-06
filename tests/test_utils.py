@@ -1,4 +1,4 @@
-from src.utils import choose_greeting, get_cards_info, get_data, sort_data_by_date
+from src.utils import choose_greeting, get_cards_info, get_data, get_top_transactions, sort_data_by_date
 
 
 def test_choose_greeting():
@@ -43,3 +43,22 @@ def test_get_cards_info():
     assert len(cards_info[0]["last_digits"]) == 4
     assert isinstance(cards_info[0]["total_spent"], float)
     assert isinstance(cards_info[0]["cashback"], float)
+
+
+def test_get_top_transactions():
+    data = get_data("./data/operations.xlsx")
+    data = sort_data_by_date(data, "2021-09-15")
+    top_transactions = get_top_transactions(data)
+
+    assert top_transactions[0] == {
+        "date": "14.09.2021",
+        "amount": 150000.0,
+        "category": "Переводы",
+        "description": "Перевод с карты",
+    }
+    assert top_transactions[4] == {
+        "date": "09.09.2021",
+        "amount": 1586.62,
+        "category": "ЖКХ",
+        "description": "ЖКУ Дом",
+    }

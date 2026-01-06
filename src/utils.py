@@ -63,8 +63,9 @@ def sort_data_by_date(data: list[dict], date: str) -> list[dict] | str:
 
 
 def get_cards_info(data: list[dict]) -> list[dict]:
-    """Принимает на вход список словарей с транзакциями и возвращает список словарей с использованными в транзакциях картами,
-    в котором содержатся последние цифры карт, общая сумма потраченных денег и сумма кэшбэка"""
+    """Принимает на вход список словарей с транзакциями и возвращает список словарей
+    с использованными в транзакциях картами, в котором содержатся последние цифры карт,
+    общая сумма потраченных денег и сумма кэшбэка"""
     cards_info = []
     cards_set = set()
 
@@ -81,3 +82,26 @@ def get_cards_info(data: list[dict]) -> list[dict]:
             card["cashback"] = round((card["total_spent"] / 100), 2)
 
     return cards_info
+
+
+def get_top_transactions(data: list[dict]) -> list[dict]:
+    """Принимает на вход список словарей с транзакциями и возвращает список словарей
+    с наибольшими по сумме транзакциями с информацией о дате операции, её сумме, категории и описании"""
+    top_transactions = []
+    sorted_data = sorted(data, key=lambda x: x["Сумма операции"])
+    sorted_info = []
+    for item in sorted_data:
+        if item["Статус"] == "OK":
+            sorted_info.append(item)
+
+    for item in sorted_info[:5]:
+        top_transactions.append(
+            {
+                "date": item["Дата операции"][:10],
+                "amount": abs(item["Сумма операции"]),
+                "category": item["Категория"],
+                "description": item["Описание"],
+            }
+        )
+
+    return top_transactions
