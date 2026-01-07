@@ -3,6 +3,8 @@ import os
 import re
 
 import pandas as pd
+import requests
+from dotenv import load_dotenv
 
 
 def choose_greeting(date: str) -> str:
@@ -105,3 +107,27 @@ def get_top_transactions(data: list[dict]) -> list[dict]:
         )
 
     return top_transactions
+
+
+def get_currency_rates(path: str) -> list[dict]:
+    """Принимает на вход путь до файла с кодами валют и акций, заданными пользователем,
+    и возвращает список словарей с кодом валюты и её стоимостью в рублях"""
+    currency_rates = []
+
+    with open(path) as f:
+        data = json.load(f)
+    user_currencies = data["user_currencies"]
+
+    load_dotenv()
+    api_key = os.getenv("CURRENCY_RATES_API_KEY")
+    url = os.getenv("CURRENCY_RATES_URL")
+    payload = {}
+    headers = {"apikey": f"{api_key}"}
+
+    for currency in user_currencies:
+        params = {"symbols": "RUB", "base": f"{currency}"}
+        response = requests.get(url, headers=headers, data=payload, params=params)
+        result = response.json()
+        currency_rates.append({"currency": currency, "rate": round(result["rates"]["RUB"], 2)})
+
+    return currency_rates

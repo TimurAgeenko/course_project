@@ -1,4 +1,16 @@
-from src.utils import choose_greeting, get_cards_info, get_data, get_top_transactions, sort_data_by_date
+import os
+from unittest.mock import patch
+
+from dotenv import load_dotenv
+
+from src.utils import (
+    choose_greeting,
+    get_cards_info,
+    get_currency_rates,
+    get_data,
+    get_top_transactions,
+    sort_data_by_date
+)
 
 
 def test_choose_greeting():
@@ -62,3 +74,29 @@ def test_get_top_transactions():
         "category": "ЖКХ",
         "description": "ЖКУ Дом",
     }
+
+
+@patch("requests.get")
+def test_get_currency_rates(mock_get):
+    mock_get.return_value.json.return_value = {
+        "success": True,
+        "timestamp": 1767751863,
+        "base": "USD",
+        "date": "2026-01-07",
+        "rates": {"RUB": 80.499355},
+    }
+
+    with open("./data/test_file", "w") as f:
+        f.write('{"user_currencies": ["USD"]}')
+    assert get_currency_rates("./data/test_file") == [{"currency": "USD", "rate": 80.5}]
+
+    os.remove("./data/test_file")
+
+    load_dotenv()
+    api_key = os.getenv("CURRENCY_RATES_API_KEY")
+    url = os.getenv("CURRENCY_RATES_URL")
+    payload = {}
+    headers = {"apikey": f"{api_key}"}
+    params = {"symbols": "RUB", "base": "USD"}
+
+    mock_get.assert_called_once_with(url, headers=headers, data=payload, params=params)
