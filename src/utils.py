@@ -109,8 +109,9 @@ def get_top_transactions(data: list[dict]) -> list[dict]:
     return top_transactions
 
 
-def get_currency_rates(path: str) -> list[dict]:
+def get_currency_rates(path: str = "../user_settings.json") -> list[dict]:
     """Принимает на вход путь до файла с кодами валют и акций, заданными пользователем,
+    который по умолчанию находится в корне проекта,
     и возвращает список словарей с кодом валюты и её стоимостью в рублях"""
     currency_rates = []
 
@@ -131,3 +132,32 @@ def get_currency_rates(path: str) -> list[dict]:
         currency_rates.append({"currency": currency, "rate": round(result["rates"]["RUB"], 2)})
 
     return currency_rates
+
+
+def get_stock_prices(path: str = "../user_settings.json") -> list[dict]:
+    """Принимает на вход путь до файла с кодами валют и акций, заданными пользователем,
+    который по умолчанию находится в корне проекта,
+    и возвращает список словарей с кодом валюты и её стоимостью в рублях"""
+    stock_prices = []
+
+    with open(path) as f:
+        data = json.load(f)
+    user_stocks = data["user_stocks"]
+
+    load_dotenv()
+    api_key = os.getenv("STOCK_PRICES_API_KEY")
+    url = os.getenv("STOCK_PRICES_URL")
+
+    for stock in user_stocks:
+        params = {"function": "TIME_SERIES_DAILY", "symbol": stock, "apikey": api_key}
+        response = requests.get(url, params=params)
+        result = response.json()
+        last_refresh_date = result["Meta Data"]["3. Last Refreshed"]
+        rate = float(result["Time Series (Daily)"][last_refresh_date]["4. close"])
+
+        currency_rates = get_currency_rates(path)
+        usd_rate = [currency["rate"] for currency in currency_rates if currency["currency"] == "USD"][0]
+
+        stock_prices.append({"stock": stock, "rate": round(rate * usd_rate, 2)})
+
+    return stock_prices

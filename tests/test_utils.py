@@ -8,6 +8,7 @@ from src.utils import (
     get_cards_info,
     get_currency_rates,
     get_data,
+    get_stock_prices,
     get_top_transactions,
     sort_data_by_date
 )
@@ -100,3 +101,42 @@ def test_get_currency_rates(mock_get):
     params = {"symbols": "RUB", "base": "USD"}
 
     mock_get.assert_called_once_with(url, headers=headers, data=payload, params=params)
+
+
+@patch("src.utils.get_currency_rates")
+@patch("requests.get")
+def test_get_stock_prices(mock_get, mock_currency_rates):
+    mock_get.return_value.json.return_value = {
+        "Meta Data": {
+            "1. Information": "Daily Prices (open, high, low, close) and Volumes",
+            "2. Symbol": "AMZN",
+            "3. Last Refreshed": "2026-01-08",
+            "4. Output Size": "Compact",
+            "5. Time Zone": "US/Eastern",
+        },
+        "Time Series (Daily)": {
+            "2026-01-08": {
+                "1. open": "243.0600",
+                "2. high": "246.4100",
+                "3. low": "241.8800",
+                "4. close": "246.2900",
+                "5. volume": "39175991",
+            }
+        },
+    }
+
+    mock_currency_rates.return_value = [{"currency": "USD", "rate": 80.5}]
+
+    with open("./data/test_file", "w") as f:
+        f.write('{"user_currencies": ["USD"], "user_stocks": ["AMZN"]}')
+    assert get_stock_prices("./data/test_file") == [{"stock": "AMZN", "rate": 19826.35}]
+
+    os.remove("./data/test_file")
+
+    load_dotenv()
+    api_key = os.getenv("STOCK_PRICES_API_KEY")
+    url = os.getenv("STOCK_PRICES_URL")
+    params = {"function": "TIME_SERIES_DAILY", "symbol": "AMZN", "apikey": api_key}
+    mock_get.assert_called_once_with(url, params=params)
+
+    mock_currency_rates.assert_called_once_with("./data/test_file")
