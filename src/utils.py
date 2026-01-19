@@ -148,15 +148,15 @@ def get_stock_prices(path: str = "../user_settings.json") -> list[dict]:
     api_key = os.getenv("STOCK_PRICES_API_KEY")
     url = os.getenv("STOCK_PRICES_URL")
 
+    currency_rates = get_currency_rates(path)
+    usd_rate = [currency["rate"] for currency in currency_rates if currency["currency"] == "USD"][0]
+
     for stock in user_stocks:
         params = {"function": "TIME_SERIES_DAILY", "symbol": stock, "apikey": api_key}
         response = requests.get(url, params=params)
         result = response.json()
         last_refresh_date = result["Meta Data"]["3. Last Refreshed"]
         rate = float(result["Time Series (Daily)"][last_refresh_date]["4. close"])
-
-        currency_rates = get_currency_rates(path)
-        usd_rate = [currency["rate"] for currency in currency_rates if currency["currency"] == "USD"][0]
 
         stock_prices.append({"stock": stock, "rate": round(rate * usd_rate, 2)})
 
