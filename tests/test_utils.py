@@ -33,6 +33,15 @@ def test_get_data_not_exist():
     assert data == "File './data/operations_excel.xlsx' not found."
 
 
+def test_get_data_not_excel():
+    with open("./data/test_file", "w") as f:
+        f.write('{"user_currencies": ["USD"], "user_stocks": ["AMZN"]}')
+    data = get_data("./data/test_file")
+    assert data == "File './data/test_file' is not an excel file."
+
+    os.remove("./data/test_file")
+
+
 def test_sort_data_by_date():
     data = get_data("./data/operations.xlsx")
     assert sort_data_by_date(data, "2021-09-15 18:00:00")[0]["Номер карты"] == "*7197"
