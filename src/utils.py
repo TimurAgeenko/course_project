@@ -155,8 +155,10 @@ def get_stock_prices(path: str = "../user_settings.json") -> list[dict]:
         params = {"function": "TIME_SERIES_DAILY", "symbol": stock, "apikey": api_key}
         response = requests.get(url, params=params)
         result = response.json()
-        last_refresh_date = result["Meta Data"]["3. Last Refreshed"]
-        rate = float(result["Time Series (Daily)"][last_refresh_date]["4. close"])
+        if "Meta Data" in result:
+            last_refresh_date = result["Meta Data"]["3. Last Refreshed"]
+        if "Time Series (Daily)" in result:
+            rate = float(result["Time Series (Daily)"][last_refresh_date]["4. close"])
 
         stock_prices.append({"stock": stock, "rate": round(rate * usd_rate, 2)})
 
