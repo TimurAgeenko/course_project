@@ -2,24 +2,24 @@ import os
 from unittest.mock import patch
 
 from dotenv import load_dotenv
+from freezegun import freeze_time
 
-from src.utils import (
-    choose_greeting,
-    get_cards_info,
-    get_currency_rates,
-    get_data,
-    get_stock_prices,
-    get_top_transactions,
-    sort_data_by_date
-)
+from src.utils import (choose_greeting, get_cards_info, get_currency_rates, get_data, get_stock_prices,
+                       get_top_transactions, sort_data_by_date)
 
 
 def test_choose_greeting():
-    assert choose_greeting("18:30") == "Добрый вечер"
-    assert choose_greeting("00:30") == "Доброй ночи"
-    assert choose_greeting("06:30") == "Доброе утро"
-    assert choose_greeting("12:30") == "Добрый день"
-    assert choose_greeting("") == "Часы указаны в неверном формате, пожалуйста, укажите их в формате HH:MM:SS"
+    with freeze_time("2026-01-20 6:00:00") as frozen:
+        assert choose_greeting() == "Доброе утро"
+
+        frozen.move_to("2026-01-20 12:00:00")
+        assert choose_greeting() == "Добрый день"
+
+        frozen.move_to("2026-01-20 18:00:00")
+        assert choose_greeting() == "Добрый вечер"
+
+        frozen.move_to("2026-01-20 00:00:00")
+        assert choose_greeting() == "Доброй ночи"
 
 
 def test_get_data():
@@ -35,20 +35,20 @@ def test_get_data_not_exist():
 
 def test_sort_data_by_date():
     data = get_data("./data/operations.xlsx")
-    assert sort_data_by_date(data, "2021-09-15")[0]["Номер карты"] == "*7197"
+    assert sort_data_by_date(data, "2021-09-15 18:00:00")[0]["Номер карты"] == "*7197"
 
 
 def test_sort_data_by_date_wrong_format():
     data = get_data("./data/operations.xlsx")
     assert (
         sort_data_by_date(data, "15-09-2021")
-        == "Дата указана в неверном формате, пожалуйста, укажите её в формате YYYY-MM-DD"
+        == "Дата указана в неверном формате, пожалуйста, укажите её в формате YYYY-MM-DD HH:MM:SS"
     )
 
 
 def test_get_cards_info():
     data = get_data("./data/operations.xlsx")
-    data = sort_data_by_date(data, "2021-09-15")
+    data = sort_data_by_date(data, "2021-09-15 18:00:00")
     cards_info = get_cards_info(data)
 
     assert len(cards_info) == 2
@@ -60,7 +60,7 @@ def test_get_cards_info():
 
 def test_get_top_transactions():
     data = get_data("./data/operations.xlsx")
-    data = sort_data_by_date(data, "2021-09-15")
+    data = sort_data_by_date(data, "2021-09-15 18:00:00")
     top_transactions = get_top_transactions(data)
 
     assert top_transactions[0] == {
