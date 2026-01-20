@@ -3,6 +3,8 @@ import re
 
 
 def get_top_cashback_categories(data: list[dict], year: int, month: int) -> str:
+    """Принимает на вход список словарей с транзакциями, год и месяц и возвращает
+    JSON-строку с категориями, по которым был получен кэшбэк за указанный месяц и год, по убыванию."""
     categories_set = set()
     unnecessary_categories = [
         "Переводы",
