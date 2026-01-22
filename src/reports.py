@@ -43,9 +43,3 @@ def spending_by_category_logged(
     transactions: pd.DataFrame, category: str, end_date: Optional[str] = None
 ) -> pd.DataFrame:
     return spending_by_category(transactions, category, end_date)
-
-
-data = pd.read_excel("../data/operations.xlsx")
-category = "Супермаркеты"
-end_date = "2021-09-15 00:00:00"
-report = spending_by_category_logged(data, category, end_date)
