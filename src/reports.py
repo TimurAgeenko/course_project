@@ -11,7 +11,7 @@ def log_to_file(file_name: str = "../logs/reports.log"):
                 f.write(f"Function '{function.__name__}' was called.\n")
                 arguments = [arg for arg in args if not isinstance(arg, pd.DataFrame)]
                 f.write(f"Arguments: {arguments}.\n")
-                f.write(f"Result:\n{result}\n")
+                f.write(f"Result:\n{result}\n\n")
             return result
 
         return inner
@@ -43,3 +43,9 @@ def spending_by_category_logged(
     transactions: pd.DataFrame, category: str, end_date: Optional[str] = None
 ) -> pd.DataFrame:
     return spending_by_category(transactions, category, end_date)
+
+
+data = pd.read_excel("../data/operations.xlsx")
+category = "Супермаркеты"
+end_date = "2021-09-15 00:00:00"
+report = spending_by_category_logged(data, category, end_date)
