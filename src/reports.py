@@ -4,6 +4,7 @@ import pandas as pd
 
 
 def log_to_file(file_name: str = "../logs/reports.log"):
+    """Декоратор для логирования вызовов функции в указанный файл."""
     def wrapper(function):
         def inner(*args, **kwargs):
             result = function(*args, **kwargs)
@@ -11,7 +12,7 @@ def log_to_file(file_name: str = "../logs/reports.log"):
                 f.write(f"Function '{function.__name__}' was called.\n")
                 arguments = [arg for arg in args if not isinstance(arg, pd.DataFrame)]
                 f.write(f"Arguments: {arguments}.\n")
-                f.write(f"Result:\n{result}\n")
+                f.write(f"Result:\n{result}\n\n")
             return result
 
         return inner
